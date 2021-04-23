@@ -1,0 +1,16 @@
+databases:
+  configs:
+    mysql_master:
+      type: mysql
+      user: root
+      password: root
+      url: [ localhost ]
+      port: 3306
+      db: testdb
+    scylla:
+      type: scylla
+      user: user_2
+      password: password_2
+      url: [ localhost ]
+      port: 12345
+      db: test_2
