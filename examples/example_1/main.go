@@ -35,9 +35,10 @@ func main() {
 
 		// If the DB call take
 		if data.TimeTaken > 1 {
-			span, _ := opentracing.StartSpanFromContext(data.Ctx, data.Name+"-LongRunningDbCall")
-			span.SetTag("error", "Time taken > 1ms")
+			span, _ := opentracing.StartSpanFromContext(data.Ctx, data.GetDbCallNameForTracing())
 			defer span.Finish()
+			span.SetTag("error", true)
+			span.SetTag("time_taken", data.TimeTaken)
 			fmt.Printf("Something is wrong it took very long: data=%s \n", serialization.StringifySuppressError(data, "na"))
 		}
 

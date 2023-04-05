@@ -10,4 +10,13 @@ type PostCallbackData struct {
 	TimeTaken int64           `json:"time_taken"`
 }
 
+func (p *PostCallbackData) GetDbCallNameForTracing() string {
+	if p.Ctx != nil && p.Ctx.Value("__SQLCX_DB_CALL_NAME__") != nil {
+		if val, ok := p.Ctx.Value("__SQLCX_DB_CALL_NAME__").(string); ok {
+			return "Slow_Query_Trace__" + val
+		}
+	}
+	return "Slow_Query_Trace__" + p.Name
+}
+
 type PostCallbackFunc func(data PostCallbackData)

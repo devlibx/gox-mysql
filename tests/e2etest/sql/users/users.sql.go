@@ -20,6 +20,7 @@ order by id desc
 `
 
 func (q *Queries) GetUser(ctx context.Context, name string) (IntegratingTestsUser, error) {
+	ctx = context.WithValue(ctx, "__SQLCX_DB_CALL_NAME__", "GetUser")
 	span, ctx := opentracing.StartSpanFromContext(ctx, "DB_Call_GetUser")
 	defer span.Finish()
 	row := q.queryRow(ctx, q.getUserStmt, GetUser, name)
@@ -35,6 +36,7 @@ WHERE deleted = 0
 `
 
 func (q *Queries) GetUsers(ctx context.Context) ([]IntegratingTestsUser, error) {
+	ctx = context.WithValue(ctx, "__SQLCX_DB_CALL_NAME__", "GetUsers")
 	span, ctx := opentracing.StartSpanFromContext(ctx, "DB_Call_GetUsers")
 	defer span.Finish()
 	rows, err := q.query(ctx, q.getUsersStmt, GetUsers)
@@ -65,6 +67,7 @@ VALUES (?)
 `
 
 func (q *Queries) PersistUser(ctx context.Context, name string) (sql.Result, error) {
+	ctx = context.WithValue(ctx, "__SQLCX_DB_CALL_NAME__", "PersistUser")
 	span, ctx := opentracing.StartSpanFromContext(ctx, "DB_Call_PersistUser")
 	defer span.Finish()
 	return q.exec(ctx, q.persistUserStmt, PersistUser, name)
@@ -82,6 +85,7 @@ type UpdateUserNameParams struct {
 }
 
 func (q *Queries) UpdateUserName(ctx context.Context, arg UpdateUserNameParams) (sql.Result, error) {
+	ctx = context.WithValue(ctx, "__SQLCX_DB_CALL_NAME__", "UpdateUserName")
 	span, ctx := opentracing.StartSpanFromContext(ctx, "DB_Call_UpdateUserName")
 	defer span.Finish()
 	return q.exec(ctx, q.updateUserNameStmt, UpdateUserName, arg.Name, arg.ID)
