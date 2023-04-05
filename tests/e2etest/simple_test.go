@@ -1,14 +1,26 @@
-package main
+package e2etest
 
 import (
 	"context"
 	"fmt"
+	"github.com/devlibx/gox-base"
 	"github.com/devlibx/gox-mysql/pkg"
 	"github.com/devlibx/gox-mysql/tests/e2etest/sql/users"
 	"github.com/stretchr/testify/assert"
+	"go.uber.org/zap"
 	"os"
 	"testing"
 )
+
+var testMySQLConfig = &pkg.MySQLConfig{
+	ServerName:  "test_server",
+	Host:        "localhost",
+	Port:        3306,
+	User:        "test",
+	Password:    "test",
+	Db:          "users",
+	TablePrefix: "integrating_tests",
+}
 
 func TestSimpleTestCase(t *testing.T) {
 	if os.Getenv("E2E_TESTS") != "true" {
@@ -32,4 +44,11 @@ func TestSimpleTestCase(t *testing.T) {
 
 	})
 
+}
+
+func NewCrossFunctionProvider() gox.CrossFunction {
+	var loggerConfig zap.Config
+	loggerConfig = zap.NewDevelopmentConfig()
+	logger, _ := loggerConfig.Build()
+	return gox.NewCrossFunction(logger)
 }
