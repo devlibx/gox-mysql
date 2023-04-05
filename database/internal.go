@@ -42,15 +42,15 @@ func (l logInfo) done(args ...interface{}) {
 
 	if l.enableSqlQueryLogging {
 		l.logger.Info(l.name, zap.Int64("time", l.timeTaken), zap.String("query", l.cleanQuery), zap.Any("args", args))
-
-		// Call the callback hook function
-		l.callbacks.PostCallbackFunc(PostCallbackData{
-			Name:      l.name,
-			StartTime: l.startTime,
-			EndTime:   endTime,
-			TimeTaken: l.timeTaken,
-		})
 	}
+
+	// Call the callback hook function
+	l.callbacks.PostCallbackFunc(PostCallbackData{
+		Name:      l.name,
+		StartTime: l.startTime,
+		EndTime:   endTime,
+		TimeTaken: l.timeTaken,
+	})
 }
 
 func cleanQuery(query string) string {
@@ -70,7 +70,7 @@ func newLogInf(query string, logger *zap.Logger, enableSqlQueryLogging bool, ena
 
 	return logInfo{
 		startTime:                   time.Now().UnixMilli(),
-		name:                        util.GetMethodNameName(4),
+		name:                        util.GetMethodNameName(5),
 		query:                       query,
 		cleanQuery:                  cleanQuery(query),
 		logger:                      logger,

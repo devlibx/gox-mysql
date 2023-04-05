@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/devlibx/gox-base"
+	"github.com/devlibx/gox-base/serialization"
 	"github.com/devlibx/gox-mysql/database"
 	"github.com/devlibx/gox-mysql/tests/e2etest/sql/users"
 	"go.uber.org/zap"
@@ -34,7 +35,7 @@ func main() {
 	q := users.New(sqlDb)
 
 	sqlDb.RegisterPostCallbackFunc(func(data database.PostCallbackData) {
-		fmt.Println("PostCallbackData=", data)
+		fmt.Println("PostCallbackData=", serialization.StringifySuppressError(data, "na"))
 	})
 
 	var count int32 = 0
