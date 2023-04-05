@@ -26,9 +26,11 @@ var testMySQLConfig = &pkg.MySQLConfig{
 	MetricResetAfterEveryNSec:   10,
 }
 
+// Main is a sample where we insert to MySQL user table. It also shows we dump the metric every 10 sec
+// (enabled by MetricResetAfterEveryNSec)
 func main() {
-	sqlDb, _ := pkg.NewMySQLDb(NewCrossFunctionProvider(), testMySQLConfig)
-	// sqlDb, _ := pkg.NewMySQLDbWithoutLogging(testMySQLConfig)
+	// sqlDb, _ := pkg.NewMySQLDb(NewCrossFunctionProvider(), testMySQLConfig)
+	sqlDb, _ := pkg.NewMySQLDbWithoutLogging(testMySQLConfig)
 	q := users.New(sqlDb)
 	var count int32 = 0
 	for i := 0; i < 10; i++ {
