@@ -67,22 +67,30 @@ func newLogInf(name string, query string, logger *zap.Logger, enableSqlQueryLogg
 	}
 }
 
-func startMetricDump(ctx context.Context) {
+func startMetricDump(ctx context.Context, config *MySQLConfig) {
 	// Start metric dumping - start only once
 	startMetricDumpSyncOnce.Do(func() {
 
 		// Dump all metric every 10 sec
-		go metrics.Log(metrics.DefaultRegistry, 10*time.Second, log.New(os.Stderr, "metrics: ", log.Lmicroseconds))
+		if config.MetricDumpIntervalSec > 0 {
+			go metrics.Log(metrics.DefaultRegistry, time.Duration(config.MetricDumpIntervalSec)*time.Second, log.New(os.Stderr, "metrics: ", log.Lmicroseconds))
+		} else {
+			go metrics.Log(metrics.DefaultRegistry, 10*time.Second, log.New(os.Stderr, "metrics: ", log.Lmicroseconds))
+		}
 
 		// Clear all metrics every 10 min and start fresh - this will avoid leak and also will give you fresh stats
 		// of last 10 min
 		go func() {
+			d := 5 * time.Minute
+			if config.MetricResetAfterEveryNSec > 0 {
+				d = time.Duration(config.MetricResetAfterEveryNSec) * time.Second
+			}
 		exit:
 			for {
 				select {
 				case <-ctx.Done():
 					goto exit
-				case <-time.After(5 * time.Minute):
+				case <-time.After(d):
 					metrics.DefaultRegistry.UnregisterAll()
 				}
 			}

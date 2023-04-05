@@ -40,7 +40,7 @@ func NewMySQLDb(cf gox.CrossFunction, config *MySQLConfig) (*DB, error) {
 
 	// Start metric logging if enabled
 	if config.EnableSqlQueryMetricLogging {
-		startMetricDump(stoppedCtx)
+		startMetricDump(stoppedCtx, config)
 	}
 
 	return &DB{

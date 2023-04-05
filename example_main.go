@@ -22,6 +22,8 @@ var testMySQLConfig = &pkg.MySQLConfig{
 
 	EnableSqlQueryLogging:       true,
 	EnableSqlQueryMetricLogging: true,
+	MetricDumpIntervalSec:       1,
+	MetricResetAfterEveryNSec:   10,
 }
 
 func main() {

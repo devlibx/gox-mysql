@@ -13,8 +13,11 @@ type MySQLConfig struct {
 	TablePrefix  string
 	TablePostfix string
 
-	EnableSqlQueryLogging       bool `json:"enable_sql_query_logging" yaml:"enable_sql_query_logging"`
+	EnableSqlQueryLogging bool `json:"enable_sql_query_logging" yaml:"enable_sql_query_logging"`
+
 	EnableSqlQueryMetricLogging bool `json:"enable_sql_query_metric_logging" yaml:"enable_sql_query_metric_logging"`
+	MetricDumpIntervalSec       int  `json:"metric_dump_interval_sec" yaml:"metric_dump_interval_sec"`
+	MetricResetAfterEveryNSec   int  `json:"metric_reset_after_every_n_sec" yaml:"metric_reset_after_every_n_sec"`
 }
 
 func (m *MySQLConfig) SetupDefaults() {
