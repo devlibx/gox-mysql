@@ -1,28 +1,3 @@
-### About
-
-This library gives convenient access to MySQL.
-
-##### Try out sample application
-
-```
-# DB name is users for this setup
-
-CREATE TABLE IF NOT EXISTS `integrating_tests_users`
-(
-    `id`      int(11) unsigned NOT NULL AUTO_INCREMENT,
-    `name`    varchar(265) NOT NULL DEFAULT '',
-    `deleted` int          DEFAULT 0,
-    PRIMARY KEY (`id`)
-);
-```
-
-Run ```example_main.go```. Update the user/password in the file if needed.
-
----
-
-### Example code
-
-```go
 package main
 
 import (
@@ -59,4 +34,3 @@ func main() {
 	}
 
 }
-```
