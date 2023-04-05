@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"github.com/devlibx/gox-base"
 	"github.com/devlibx/gox-base/errors"
-	"github.com/devlibx/gox-base/util"
-	"github.com/opentracing/opentracing-go"
 	_ "github.com/rcrowley/go-metrics"
 	"go.uber.org/zap"
 	"sync"
@@ -89,58 +87,27 @@ func (d *DB) Close() {
 }
 
 func (d *DB) Exec(query string, args ...interface{}) (sql.Result, error) {
-
-	// Log query details and metrics
 	defer d.buildNewLogInf(context.Background(), query).done(args...)
-
 	return d.db.Exec(query, args...)
 }
 
 func (d *DB) ExecContext(ctx context.Context, query string, args ...interface{}) (sql.Result, error) {
-
-	// Log span and trace
-	span, ctx := opentracing.StartSpanFromContext(ctx, util.GetMethodName(methodDepthToGetFunctionName))
-	defer span.Finish()
-
-	// Log query details and metrics
 	defer d.buildNewLogInf(ctx, query).done(args...)
-
 	return d.db.ExecContext(ctx, query, args...)
 }
 
 func (d *DB) PrepareContext(ctx context.Context, query string) (*sql.Stmt, error) {
-
-	// Log span and trace
-	span, ctx := opentracing.StartSpanFromContext(ctx, util.GetMethodName(methodDepthToGetFunctionName))
-	defer span.Finish()
-
-	// Log query details and metrics
 	defer d.buildNewLogInf(ctx, query).done()
-
 	return d.db.PrepareContext(ctx, query)
 }
 
 func (d *DB) QueryContext(ctx context.Context, query string, args ...interface{}) (*sql.Rows, error) {
-
-	// Log span and trace
-	span, ctx := opentracing.StartSpanFromContext(ctx, util.GetMethodName(methodDepthToGetFunctionName))
-	defer span.Finish()
-
-	// Log query details and metrics
 	defer d.buildNewLogInf(ctx, query).done(args...)
-
 	return d.db.QueryContext(ctx, query, args...)
 }
 
 func (d *DB) QueryRowContext(ctx context.Context, query string, args ...interface{}) *sql.Row {
-
-	// Log span and trace
-	span, ctx := opentracing.StartSpanFromContext(ctx, util.GetMethodName(methodDepthToGetFunctionName))
-	defer span.Finish()
-
-	// Log query details and metrics
 	defer d.buildNewLogInf(ctx, query).done(args...)
-
 	return d.db.QueryRowContext(ctx, query, args...)
 }
 

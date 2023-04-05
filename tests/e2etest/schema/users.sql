@@ -1,5 +1,6 @@
 -- name: PersistUser :execresult
-INSERT INTO integrating_tests_users (name) VALUES (?);
+INSERT INTO integrating_tests_users (name)
+VALUES (?);
 
 -- name: UpdateUserName :execresult
 UPDATE integrating_tests_users

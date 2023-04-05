@@ -6,6 +6,7 @@
 package users
 
 import (
+	"github.com/opentracing/opentracing-go"
 	"context"
 	"database/sql"
 )
@@ -13,10 +14,14 @@ import (
 const GetUser = `-- name: GetUser :one
 SELECT id, name, deleted
 from integrating_tests_users
-WHERE name=? and deleted = 0 order by id desc
+WHERE name = ?
+  and deleted = 0
+order by id desc
 `
 
 func (q *Queries) GetUser(ctx context.Context, name string) (IntegratingTestsUser, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "DB_Call_GetUser")
+	defer span.Finish()
 	row := q.queryRow(ctx, q.getUserStmt, GetUser, name)
 	var i IntegratingTestsUser
 	err := row.Scan(&i.ID, &i.Name, &i.Deleted)
@@ -30,6 +35,8 @@ WHERE deleted = 0
 `
 
 func (q *Queries) GetUsers(ctx context.Context) ([]IntegratingTestsUser, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "DB_Call_GetUsers")
+	defer span.Finish()
 	rows, err := q.query(ctx, q.getUsersStmt, GetUsers)
 	if err != nil {
 		return nil, err
@@ -58,6 +65,8 @@ VALUES (?)
 `
 
 func (q *Queries) PersistUser(ctx context.Context, name string) (sql.Result, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "DB_Call_PersistUser")
+	defer span.Finish()
 	return q.exec(ctx, q.persistUserStmt, PersistUser, name)
 }
 
@@ -73,5 +82,7 @@ type UpdateUserNameParams struct {
 }
 
 func (q *Queries) UpdateUserName(ctx context.Context, arg UpdateUserNameParams) (sql.Result, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "DB_Call_UpdateUserName")
+	defer span.Finish()
 	return q.exec(ctx, q.updateUserNameStmt, UpdateUserName, arg.Name, arg.ID)
 }
