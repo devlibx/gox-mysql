@@ -2,6 +2,7 @@ package pkg
 
 import (
 	"context"
+	"github.com/devlibx/gox-base/util"
 	"github.com/rcrowley/go-metrics"
 	"go.uber.org/zap"
 	"log"
@@ -40,6 +41,12 @@ func (l logInfo) done(args ...interface{}) {
 	}
 }
 
+func cleanQuery(query string) string {
+	result := regexToCleanQueryToDump.ReplaceAllString(query, "")
+	result = strings.ReplaceAll(result, "\n", " ")
+	return strings.TrimSpace(result)
+}
+
 func newLogInf(name string, query string, logger *zap.Logger, enableSqlQueryLogging bool, enableSqlQueryMetricLogging bool) logInfo {
 
 	//  re := regexp.MustCompile(`^--\s*name:\s*(\S+)\s*:.*\n`)
@@ -48,14 +55,12 @@ func newLogInf(name string, query string, logger *zap.Logger, enableSqlQueryLogg
 	//    if len(match) > 1 {
 	//        name := match[1]
 	//        fmt.Println(name)
-	cleanQuery := regexToCleanQueryToDump.ReplaceAllString(query, "")
-	cleanQuery = strings.ReplaceAll(query, "\n", " ")
 
 	return logInfo{
 		startTime:                   time.Now().UnixMilli(),
-		name:                        name,
+		name:                        util.GetMethodNameName(4),
 		query:                       query,
-		cleanQuery:                  cleanQuery,
+		cleanQuery:                  cleanQuery(query),
 		logger:                      logger,
 		enableSqlQueryLogging:       enableSqlQueryLogging,
 		enableSqlQueryMetricLogging: enableSqlQueryMetricLogging,
