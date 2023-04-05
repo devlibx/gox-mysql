@@ -10,27 +10,27 @@ import (
 	"database/sql"
 )
 
-const getUser = `-- name: GetUser :one
+const GetUser = `-- name: GetUser :one
 SELECT id, name, deleted
 from integrating_tests_users
 WHERE name=? and deleted = 0 order by id desc
 `
 
 func (q *Queries) GetUser(ctx context.Context, name string) (IntegratingTestsUser, error) {
-	row := q.db.QueryRowContext(ctx, getUser, name)
+	row := q.queryRow(ctx, q.getUserStmt, GetUser, name)
 	var i IntegratingTestsUser
 	err := row.Scan(&i.ID, &i.Name, &i.Deleted)
 	return i, err
 }
 
-const getUsers = `-- name: GetUsers :many
+const GetUsers = `-- name: GetUsers :many
 SELECT id, name, deleted
 from integrating_tests_users
 WHERE deleted = 0
 `
 
 func (q *Queries) GetUsers(ctx context.Context) ([]IntegratingTestsUser, error) {
-	rows, err := q.db.QueryContext(ctx, getUsers)
+	rows, err := q.query(ctx, q.getUsersStmt, GetUsers)
 	if err != nil {
 		return nil, err
 	}
@@ -52,16 +52,16 @@ func (q *Queries) GetUsers(ctx context.Context) ([]IntegratingTestsUser, error) 
 	return items, nil
 }
 
-const persistUser = `-- name: PersistUser :execresult
+const PersistUser = `-- name: PersistUser :execresult
 INSERT INTO integrating_tests_users (name)
 VALUES (?)
 `
 
 func (q *Queries) PersistUser(ctx context.Context, name string) (sql.Result, error) {
-	return q.db.ExecContext(ctx, persistUser, name)
+	return q.exec(ctx, q.persistUserStmt, PersistUser, name)
 }
 
-const updateUserName = `-- name: UpdateUserName :execresult
+const UpdateUserName = `-- name: UpdateUserName :execresult
 UPDATE integrating_tests_users
 SET name=?
 where id = ?
@@ -73,5 +73,5 @@ type UpdateUserNameParams struct {
 }
 
 func (q *Queries) UpdateUserName(ctx context.Context, arg UpdateUserNameParams) (sql.Result, error) {
-	return q.db.ExecContext(ctx, updateUserName, arg.Name, arg.ID)
+	return q.exec(ctx, q.updateUserNameStmt, UpdateUserName, arg.Name, arg.ID)
 }
