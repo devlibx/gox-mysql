@@ -27,7 +27,7 @@ func main() {
 	}
 
 	// This is a callback (Optional)
-	// It tell you time takne, when this DB call started, ended etc
+	// It tell you time taken, when this DB call started, ended etc.
 	// You can use it to alert if some specific query take some time (you get the name of the query in the payload)
 	sqlDb.RegisterPostCallbackFunc(func(data database.PostCallbackData) {
 		fmt.Println("PostCallbackData=", serialization.StringifySuppressError(data, "na"))
