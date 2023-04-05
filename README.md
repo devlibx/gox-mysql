@@ -75,7 +75,8 @@ func main() {
 			fmt.Printf("Something is wrong it took very long: data=%s \n", serialization.StringifySuppressError(data, "na"))
 		}
 
-		// We will get the callback which contains total time taken for debuting
+		// We will get the callback which contains total time taken for debuging (also the Query name which you defined
+		// in your SQL file)
 		// Note you can add your own alerts e.g. If this is "PersistUser" and take more than 20 ms
 		// then do something
 		// >> PostCallbackData= {"name":"users.(*Queries).PersistUser","start_time":1680709127885,"end_time":1680709127898,"time_taken":13}
