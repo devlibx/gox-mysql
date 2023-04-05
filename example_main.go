@@ -30,8 +30,8 @@ var testMySQLConfig = &database.MySQLConfig{
 // Main is a sample where we insert to MySQL user table. It also shows we dump the metric every 10 sec
 // (enabled by MetricResetAfterEveryNSec)
 func main() {
-	// sqlDb, _ := pkg.NewMySQLDb(NewCrossFunctionProvider(), testMySQLConfig)
-	sqlDb, _ := database.NewMySQLDbWithoutLogging(testMySQLConfig)
+	sqlDb, _ := database.NewMySQLDb(NewCrossFunctionProvider(), testMySQLConfig)
+	// sqlDb, _ := database.NewMySQLDbWithoutLogging(testMySQLConfig)
 	q := users.New(sqlDb)
 
 	sqlDb.RegisterPostCallbackFunc(func(data database.PostCallbackData) {
