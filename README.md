@@ -1,6 +1,13 @@
 ### About
 
-This library gives convenient access to MySQL.
+This library gives convenient access to MySQL. It comes with few defaults:
+1. SqlC support which allows toy to generate the Go typesafe code from SQL statements
+2. OpenTracing - if OpenTracing is configured then it will add the time taken by DB call in the Span
+3. After each DB call, it will call your PostCallbackFunc function -> if registered by you,
+   You can log slow query, Or you can add it as an error in your span (given in example below)
+4. SQL statement and SQL payload can be turned on to debug. Set EnableSqlQueryLogging=true
+5. You can enable histogram during perf to how each query is doing. It is dumped to the console every N sec
+   This will help in perf testing
 
 ##### Try out sample application
 
