@@ -1,7 +1,6 @@
 package pkg
 
 import (
-	"fmt"
 	"github.com/rcrowley/go-metrics"
 	"go.uber.org/zap"
 	"log"
@@ -16,54 +15,28 @@ var regexToCleanQueryToDump = regexp.MustCompile(`^[^\n]+\n`)
 var regexFileQueryName = regexp.MustCompile(`^--\s*name:\s*(\S+)\s*:.*\n`)
 var startMetricDumpSyncOnce = sync.Once{}
 
-const queryKey = "__q__"
-const txnKey = "__txn__"
-
-var histogram = map[string]metrics.Histogram{}
-var mutex = sync.Mutex{}
-
 type logInfo struct {
-	name       string
-	startTime  int64
-	timeTaken  int64
-	query      string
-	cleanQuery string
-	logger     *zap.Logger
-	hist       metrics.Histogram
-
+	name                        string
+	startTime                   int64
+	timeTaken                   int64
+	query                       string
+	cleanQuery                  string
+	logger                      *zap.Logger
+	hist                        metrics.Histogram
 	enableSqlQueryLogging       bool
 	enableSqlQueryMetricLogging bool
 }
 
-func (l logInfo) dump(args ...interface{}) {
+func (l logInfo) done(args ...interface{}) {
+	l.timeTaken = time.Now().UnixMilli() - l.startTime
+	if l.enableSqlQueryMetricLogging {
+		q := l.cleanQuery
+		l.hist = metrics.GetOrRegisterHistogram(q, metrics.DefaultRegistry, metrics.NewExpDecaySample(1028, 0.015))
+		l.hist.Update(l.timeTaken)
+	}
 	if l.enableSqlQueryLogging {
 		l.logger.Info(l.name, zap.Int64("time", l.timeTaken), zap.String("query", l.cleanQuery), zap.Any("args", args))
 	}
-}
-
-func (l logInfo) done(args ...interface{}) {
-	l.timeTaken = time.Now().UnixMilli() - l.startTime
-
-	if l.enableSqlQueryMetricLogging {
-		mutex.Lock()
-		defer mutex.Unlock()
-
-		q := l.cleanQuery
-		if h, ok := histogram[q].(metrics.Histogram); !ok {
-			s := metrics.NewExpDecaySample(1028, 0.015)
-			hist := metrics.NewHistogram(s)
-			if err := metrics.Register(q, hist); err != nil {
-				fmt.Println(err)
-			} else {
-				l.hist = hist
-				histogram[q] = hist
-			}
-		} else {
-			l.hist = h
-		}
-		l.hist.Update(l.timeTaken)
-	}
-	l.dump(args...)
 }
 
 func newLogInf(name string, query string, logger *zap.Logger, enableSqlQueryLogging bool, enableSqlQueryMetricLogging bool) logInfo {
