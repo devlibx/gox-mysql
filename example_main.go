@@ -26,6 +26,7 @@ var testMySQLConfig = &pkg.MySQLConfig{
 
 func main() {
 	sqlDb, _ := pkg.NewMySQLDb(NewCrossFunctionProvider(), testMySQLConfig)
+	// sqlDb, _ := pkg.NewMySQLDbWithoutLogging(testMySQLConfig)
 	q := users.New(sqlDb)
 	var count int32 = 0
 	for i := 0; i < 10; i++ {
@@ -48,7 +49,13 @@ func main() {
 			}
 		}(i)
 	}
-	time.Sleep(10 * time.Minute)
+
+	go func() {
+		time.Sleep(30 * time.Second)
+		sqlDb.Close()
+	}()
+
+	<-sqlDb.WaitCloseChannel()
 }
 
 func NewCrossFunctionProvider() gox.CrossFunction {

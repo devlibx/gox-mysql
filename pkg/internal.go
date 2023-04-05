@@ -1,6 +1,7 @@
 package pkg
 
 import (
+	"context"
 	"github.com/rcrowley/go-metrics"
 	"go.uber.org/zap"
 	"log"
@@ -41,11 +42,6 @@ func (l logInfo) done(args ...interface{}) {
 
 func newLogInf(name string, query string, logger *zap.Logger, enableSqlQueryLogging bool, enableSqlQueryMetricLogging bool) logInfo {
 
-	// Start metric dumping - start only once
-	startMetricDumpSyncOnce.Do(func() {
-		go metrics.Log(metrics.DefaultRegistry, 5*time.Second, log.New(os.Stderr, "metrics: ", log.Lmicroseconds))
-	})
-
 	//  re := regexp.MustCompile(`^--\s*name:\s*(\S+)\s*:.*\n`)
 	//    match := re.FindStringSubmatch(input)
 	//
@@ -54,6 +50,37 @@ func newLogInf(name string, query string, logger *zap.Logger, enableSqlQueryLogg
 	//        fmt.Println(name)
 	cleanQuery := regexToCleanQueryToDump.ReplaceAllString(query, "")
 	cleanQuery = strings.ReplaceAll(query, "\n", " ")
-	return logInfo{startTime: time.Now().UnixMilli(), name: name, query: query, cleanQuery: cleanQuery, logger: logger,
-		enableSqlQueryLogging: enableSqlQueryLogging, enableSqlQueryMetricLogging: enableSqlQueryMetricLogging}
+
+	return logInfo{
+		startTime:                   time.Now().UnixMilli(),
+		name:                        name,
+		query:                       query,
+		cleanQuery:                  cleanQuery,
+		logger:                      logger,
+		enableSqlQueryLogging:       enableSqlQueryLogging,
+		enableSqlQueryMetricLogging: enableSqlQueryMetricLogging,
+	}
+}
+
+func startMetricDump(ctx context.Context) {
+	// Start metric dumping - start only once
+	startMetricDumpSyncOnce.Do(func() {
+
+		// Dump all metric every 10 sec
+		go metrics.Log(metrics.DefaultRegistry, 10*time.Second, log.New(os.Stderr, "metrics: ", log.Lmicroseconds))
+
+		// Clear all metrics every 10 min and start fresh - this will avoid leak and also will give you fresh stats
+		// of last 10 min
+		go func() {
+		exit:
+			for {
+				select {
+				case <-ctx.Done():
+					goto exit
+				case <-time.After(5 * time.Minute):
+					metrics.DefaultRegistry.UnregisterAll()
+				}
+			}
+		}()
+	})
 }
