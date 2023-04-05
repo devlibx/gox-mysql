@@ -26,6 +26,12 @@ type DB struct {
 	stopCompleteChan     chan bool
 	stoppedCtx           context.Context
 	stoppedCtxCancelFunc context.CancelFunc
+
+	callbacks *Callbacks
+}
+
+type Callbacks struct {
+	PostCallbackFunc PostCallbackFunc
 }
 
 func NewMySQLDbWithoutLogging(config *MySQLConfig) (*DB, error) {
@@ -47,6 +53,11 @@ func NewMySQLDb(cf gox.CrossFunction, config *MySQLConfig) (*DB, error) {
 		startMetricDump(stoppedCtx, config)
 	}
 
+	// Add callback functions
+	callbacks := &Callbacks{
+		PostCallbackFunc: func(data PostCallbackData) {},
+	}
+
 	return &DB{
 		db:                   _db,
 		dsn:                  "",
@@ -56,7 +67,12 @@ func NewMySQLDb(cf gox.CrossFunction, config *MySQLConfig) (*DB, error) {
 		stopCompleteChan:     make(chan bool, 2),
 		stoppedCtx:           stoppedCtx,
 		stoppedCtxCancelFunc: stoppedCtxCancelFunc,
+		callbacks:            callbacks,
 	}, nil
+}
+
+func (d *DB) RegisterPostCallbackFunc(function PostCallbackFunc) {
+	d.callbacks.PostCallbackFunc = function
 }
 
 func (d *DB) WaitCloseChannel() chan bool {
@@ -75,7 +91,7 @@ func (d *DB) Close() {
 func (d *DB) Exec(query string, args ...interface{}) (sql.Result, error) {
 
 	// Log query details and metrics
-	defer newLogInf(query, d.logger, d.config.EnableSqlQueryLogging, d.config.EnableSqlQueryMetricLogging).done(args...)
+	defer d.buildNewLogInf(query).done(args...)
 
 	return d.db.Exec(query, args...)
 }
@@ -87,7 +103,7 @@ func (d *DB) ExecContext(ctx context.Context, query string, args ...interface{})
 	defer span.Finish()
 
 	// Log query details and metrics
-	defer newLogInf(query, d.logger, d.config.EnableSqlQueryLogging, d.config.EnableSqlQueryMetricLogging).done(args...)
+	defer d.buildNewLogInf(query).done(args...)
 
 	return d.db.ExecContext(ctx, query, args...)
 }
@@ -99,7 +115,7 @@ func (d *DB) PrepareContext(ctx context.Context, query string) (*sql.Stmt, error
 	defer span.Finish()
 
 	// Log query details and metrics
-	defer newLogInf(query, d.logger, d.config.EnableSqlQueryLogging, d.config.EnableSqlQueryMetricLogging).done()
+	defer d.buildNewLogInf(query).done()
 
 	return d.db.PrepareContext(ctx, query)
 }
@@ -111,7 +127,7 @@ func (d *DB) QueryContext(ctx context.Context, query string, args ...interface{}
 	defer span.Finish()
 
 	// Log query details and metrics
-	defer newLogInf(query, d.logger, d.config.EnableSqlQueryLogging, d.config.EnableSqlQueryMetricLogging).done(args...)
+	defer d.buildNewLogInf(query).done(args...)
 
 	return d.db.QueryContext(ctx, query, args...)
 }
@@ -123,7 +139,11 @@ func (d *DB) QueryRowContext(ctx context.Context, query string, args ...interfac
 	defer span.Finish()
 
 	// Log query details and metrics
-	defer newLogInf(query, d.logger, d.config.EnableSqlQueryLogging, d.config.EnableSqlQueryMetricLogging).done(args...)
+	defer d.buildNewLogInf(query).done(args...)
 
 	return d.db.QueryRowContext(ctx, query, args...)
+}
+
+func (d *DB) buildNewLogInf(query string) logInfo {
+	return newLogInf(query, d.logger, d.config.EnableSqlQueryLogging, d.config.EnableSqlQueryMetricLogging, d.callbacks)
 }

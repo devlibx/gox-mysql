@@ -32,6 +32,11 @@ func main() {
 	// sqlDb, _ := pkg.NewMySQLDb(NewCrossFunctionProvider(), testMySQLConfig)
 	sqlDb, _ := database.NewMySQLDbWithoutLogging(testMySQLConfig)
 	q := users.New(sqlDb)
+
+	sqlDb.RegisterPostCallbackFunc(func(data database.PostCallbackData) {
+		fmt.Println("PostCallbackData=", data)
+	})
+
 	var count int32 = 0
 	for i := 0; i < 10; i++ {
 		go func(index int) {

@@ -25,19 +25,31 @@ type logInfo struct {
 	cleanQuery                  string
 	logger                      *zap.Logger
 	hist                        metrics.Histogram
+	callbacks                   *Callbacks
 	enableSqlQueryLogging       bool
 	enableSqlQueryMetricLogging bool
 }
 
 func (l logInfo) done(args ...interface{}) {
-	l.timeTaken = time.Now().UnixMilli() - l.startTime
+	endTime := time.Now().UnixMilli()
+	l.timeTaken = endTime - l.startTime
+
 	if l.enableSqlQueryMetricLogging {
 		q := l.cleanQuery
 		l.hist = metrics.GetOrRegisterHistogram(q, metrics.DefaultRegistry, metrics.NewExpDecaySample(1028, 0.015))
 		l.hist.Update(l.timeTaken)
 	}
+
 	if l.enableSqlQueryLogging {
 		l.logger.Info(l.name, zap.Int64("time", l.timeTaken), zap.String("query", l.cleanQuery), zap.Any("args", args))
+
+		// Call the callback hook function
+		l.callbacks.PostCallbackFunc(PostCallbackData{
+			Name:      l.name,
+			StartTime: l.startTime,
+			EndTime:   endTime,
+			TimeTaken: l.timeTaken,
+		})
 	}
 }
 
@@ -47,7 +59,7 @@ func cleanQuery(query string) string {
 	return strings.TrimSpace(result)
 }
 
-func newLogInf(query string, logger *zap.Logger, enableSqlQueryLogging bool, enableSqlQueryMetricLogging bool) logInfo {
+func newLogInf(query string, logger *zap.Logger, enableSqlQueryLogging bool, enableSqlQueryMetricLogging bool, callbacks *Callbacks) logInfo {
 
 	//  re := regexp.MustCompile(`^--\s*name:\s*(\S+)\s*:.*\n`)
 	//    match := re.FindStringSubmatch(input)
@@ -62,6 +74,7 @@ func newLogInf(query string, logger *zap.Logger, enableSqlQueryLogging bool, ena
 		query:                       query,
 		cleanQuery:                  cleanQuery(query),
 		logger:                      logger,
+		callbacks:                   callbacks,
 		enableSqlQueryLogging:       enableSqlQueryLogging,
 		enableSqlQueryMetricLogging: enableSqlQueryMetricLogging,
 	}
