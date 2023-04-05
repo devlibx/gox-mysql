@@ -6,16 +6,15 @@ import (
 	"fmt"
 	"github.com/devlibx/gox-base"
 	"github.com/devlibx/gox-base/errors"
+	_ "github.com/rcrowley/go-metrics"
 	"go.uber.org/zap"
-	"regexp"
 )
-
-var regexToCleanQueryToDump = regexp.MustCompile(`^[^\n]+\n`)
 
 type DB struct {
 	db     *sql.DB
 	dsn    string
 	logger *zap.Logger
+	config *MySQLConfig
 }
 
 func NewMySQLDb(cf gox.CrossFunction, config *MySQLConfig) (*DB, error) {
@@ -28,30 +27,31 @@ func NewMySQLDb(cf gox.CrossFunction, config *MySQLConfig) (*DB, error) {
 		db:     _db,
 		dsn:    "",
 		logger: cf.Logger().Named("db"),
+		config: config,
 	}, nil
 }
 
 func (d DB) Exec(query string, args ...interface{}) (sql.Result, error) {
-	defer newLogInf("Exec", query, d.logger).done(args...)
+	defer newLogInf("Exec", query, d.logger, d.config.EnableSqlQueryLogging, d.config.EnableSqlQueryMetricLogging).done(args...)
 	return d.db.Exec(query, args...)
 }
 
 func (d DB) ExecContext(ctx context.Context, query string, args ...interface{}) (sql.Result, error) {
-	defer newLogInf("ExecContext", query, d.logger).done(args...)
+	defer newLogInf("ExecContext", query, d.logger, d.config.EnableSqlQueryLogging, d.config.EnableSqlQueryMetricLogging).done(args...)
 	return d.db.ExecContext(ctx, query, args...)
 }
 
 func (d DB) PrepareContext(ctx context.Context, query string) (*sql.Stmt, error) {
-	defer newLogInf("PrepareContext", query, d.logger).done()
+	defer newLogInf("PrepareContext", query, d.logger, d.config.EnableSqlQueryLogging, d.config.EnableSqlQueryMetricLogging).done()
 	return d.db.PrepareContext(ctx, query)
 }
 
 func (d DB) QueryContext(ctx context.Context, query string, args ...interface{}) (*sql.Rows, error) {
-	defer newLogInf("QueryContext", query, d.logger).done()
+	defer newLogInf("QueryContext", query, d.logger, d.config.EnableSqlQueryLogging, d.config.EnableSqlQueryMetricLogging).done(args...)
 	return d.db.QueryContext(ctx, query, args...)
 }
 
 func (d DB) QueryRowContext(ctx context.Context, query string, args ...interface{}) *sql.Row {
-	defer newLogInf("QueryRowContext", query, d.logger).done()
+	defer newLogInf("QueryRowContext", query, d.logger, d.config.EnableSqlQueryLogging, d.config.EnableSqlQueryMetricLogging).done(args...)
 	return d.db.QueryRowContext(ctx, query, args...)
 }

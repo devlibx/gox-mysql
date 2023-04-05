@@ -19,6 +19,9 @@ var testMySQLConfig = &pkg.MySQLConfig{
 	Password:    "test",
 	Db:          "users",
 	TablePrefix: "integrating_tests",
+
+	EnableSqlQueryLogging:       true,
+	EnableSqlQueryMetricLogging: true,
 }
 
 func main() {
@@ -41,6 +44,7 @@ func main() {
 					// fmt.Println("Index=", index, "Id=", id, "Rows=", rows, "Count=", count)
 				}
 				_, _ = id, rows
+				time.Sleep(1000 * time.Millisecond)
 			}
 		}(i)
 	}

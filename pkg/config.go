@@ -12,6 +12,9 @@ type MySQLConfig struct {
 	Db           string `json:"db" yaml:"db"`
 	TablePrefix  string
 	TablePostfix string
+
+	EnableSqlQueryLogging       bool `json:"enable_sql_query_logging" yaml:"enable_sql_query_logging"`
+	EnableSqlQueryMetricLogging bool `json:"enable_sql_query_metric_logging" yaml:"enable_sql_query_metric_logging"`
 }
 
 func (m *MySQLConfig) SetupDefaults() {
