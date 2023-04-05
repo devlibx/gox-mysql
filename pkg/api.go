@@ -8,8 +8,6 @@ import (
 	"github.com/devlibx/gox-base/errors"
 	"go.uber.org/zap"
 	"regexp"
-	"strings"
-	"time"
 )
 
 var regexToCleanQueryToDump = regexp.MustCompile(`^[^\n]+\n`)
@@ -56,25 +54,4 @@ func (d DB) QueryContext(ctx context.Context, query string, args ...interface{})
 func (d DB) QueryRowContext(ctx context.Context, query string, args ...interface{}) *sql.Row {
 	defer newLogInf("QueryRowContext", query, d.logger).done()
 	return d.db.QueryRowContext(ctx, query, args...)
-}
-
-type logInfo struct {
-	name      string
-	startTime int64
-	query     string
-	logger    *zap.Logger
-}
-
-func (l logInfo) dump(args ...interface{}) {
-	query := regexToCleanQueryToDump.ReplaceAllString(l.query, "")
-	query = strings.ReplaceAll(query, "\n", " ")
-	l.logger.Info(l.name, zap.Int64("time", time.Now().UnixMilli()-l.startTime), zap.String("query", query), zap.Any("args", args))
-}
-
-func (l logInfo) done(args ...interface{}) {
-	l.dump(args...)
-}
-
-func newLogInf(name string, query string, logger *zap.Logger) logInfo {
-	return logInfo{startTime: time.Now().UnixMilli(), name: name, query: query, logger: logger}
 }
