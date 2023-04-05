@@ -31,7 +31,7 @@ type logInfo struct {
 	enableSqlQueryMetricLogging bool
 }
 
-func (l logInfo) done(args ...interface{}) {
+func (l logInfo) done(err error, args ...interface{}) {
 	endTime := time.Now().UnixMilli()
 	l.timeTaken = endTime - l.startTime
 
@@ -52,6 +52,7 @@ func (l logInfo) done(args ...interface{}) {
 		StartTime: l.startTime,
 		EndTime:   endTime,
 		TimeTaken: l.timeTaken,
+		Err:       err,
 	})
 }
 

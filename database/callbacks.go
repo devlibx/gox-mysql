@@ -8,6 +8,7 @@ type PostCallbackData struct {
 	StartTime int64           `json:"start_time"`
 	EndTime   int64           `json:"end_time"`
 	TimeTaken int64           `json:"time_taken"`
+	Err       error           `json:"error"`
 }
 
 func (p *PostCallbackData) GetDbCallNameForTracing() string {

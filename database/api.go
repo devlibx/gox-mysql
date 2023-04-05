@@ -86,28 +86,32 @@ func (d *DB) Close() {
 	})
 }
 
-func (d *DB) Exec(query string, args ...interface{}) (sql.Result, error) {
-	defer d.buildNewLogInf(context.Background(), query).done(args...)
-	return d.db.Exec(query, args...)
+func (d *DB) Exec(query string, args ...interface{}) (result sql.Result, err error) {
+	defer d.buildNewLogInf(context.Background(), query).done(err, args...)
+	result, err = d.db.Exec(query, args...)
+	return result, err
 }
 
-func (d *DB) ExecContext(ctx context.Context, query string, args ...interface{}) (sql.Result, error) {
-	defer d.buildNewLogInf(ctx, query).done(args...)
-	return d.db.ExecContext(ctx, query, args...)
+func (d *DB) ExecContext(ctx context.Context, query string, args ...interface{}) (result sql.Result, err error) {
+	defer d.buildNewLogInf(ctx, query).done(err, args...)
+	result, err = d.db.ExecContext(ctx, query, args...)
+	return result, err
 }
 
-func (d *DB) PrepareContext(ctx context.Context, query string) (*sql.Stmt, error) {
-	defer d.buildNewLogInf(ctx, query).done()
-	return d.db.PrepareContext(ctx, query)
+func (d *DB) PrepareContext(ctx context.Context, query string) (result *sql.Stmt, err error) {
+	defer d.buildNewLogInf(ctx, query).done(err)
+	result, err = d.db.PrepareContext(ctx, query)
+	return result, err
 }
 
-func (d *DB) QueryContext(ctx context.Context, query string, args ...interface{}) (*sql.Rows, error) {
-	defer d.buildNewLogInf(ctx, query).done(args...)
-	return d.db.QueryContext(ctx, query, args...)
+func (d *DB) QueryContext(ctx context.Context, query string, args ...interface{}) (result *sql.Rows, err error) {
+	defer d.buildNewLogInf(ctx, query).done(err, args...)
+	result, err = d.db.QueryContext(ctx, query, args...)
+	return result, err
 }
 
 func (d *DB) QueryRowContext(ctx context.Context, query string, args ...interface{}) *sql.Row {
-	defer d.buildNewLogInf(ctx, query).done(args...)
+	defer d.buildNewLogInf(ctx, query).done(nil, args...)
 	return d.db.QueryRowContext(ctx, query, args...)
 }
 
