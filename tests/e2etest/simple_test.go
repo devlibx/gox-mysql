@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/devlibx/gox-base"
-	"github.com/devlibx/gox-mysql/pkg"
+	"github.com/devlibx/gox-mysql/database"
 	"github.com/devlibx/gox-mysql/tests/e2etest/sql/users"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
@@ -12,7 +12,7 @@ import (
 	"testing"
 )
 
-var testMySQLConfig = &pkg.MySQLConfig{
+var testMySQLConfig = &database.MySQLConfig{
 	ServerName:  "test_server",
 	Host:        "localhost",
 	Port:        3306,
@@ -27,7 +27,7 @@ func TestSimpleTestCase(t *testing.T) {
 		t.Skip("Enable end-to-end test by setting E2E_TESTS=true")
 	}
 
-	sqlDb, err := pkg.NewMySQLDb(NewCrossFunctionProvider(), testMySQLConfig)
+	sqlDb, err := database.NewMySQLDb(NewCrossFunctionProvider(), testMySQLConfig)
 	assert.NoError(t, err)
 
 	t.Run("Insert a new user", func(t *testing.T) {

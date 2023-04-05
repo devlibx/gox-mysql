@@ -1,4 +1,4 @@
-package pkg
+package database
 
 import "github.com/devlibx/gox-base/util"
 import _ "github.com/go-sql-driver/mysql"

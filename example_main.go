@@ -4,14 +4,14 @@ import (
 	"context"
 	"fmt"
 	"github.com/devlibx/gox-base"
-	"github.com/devlibx/gox-mysql/pkg"
+	"github.com/devlibx/gox-mysql/database"
 	"github.com/devlibx/gox-mysql/tests/e2etest/sql/users"
 	"go.uber.org/zap"
 	"sync/atomic"
 	"time"
 )
 
-var testMySQLConfig = &pkg.MySQLConfig{
+var testMySQLConfig = &database.MySQLConfig{
 	ServerName:  "test_server",
 	Host:        "localhost",
 	Port:        3306,
@@ -30,7 +30,7 @@ var testMySQLConfig = &pkg.MySQLConfig{
 // (enabled by MetricResetAfterEveryNSec)
 func main() {
 	// sqlDb, _ := pkg.NewMySQLDb(NewCrossFunctionProvider(), testMySQLConfig)
-	sqlDb, _ := pkg.NewMySQLDbWithoutLogging(testMySQLConfig)
+	sqlDb, _ := database.NewMySQLDbWithoutLogging(testMySQLConfig)
 	q := users.New(sqlDb)
 	var count int32 = 0
 	for i := 0; i < 10; i++ {

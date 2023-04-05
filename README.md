@@ -21,6 +21,7 @@ Run ```example_main.go```. Update the user/password in the file if needed.
 ---
 
 ### Example code
+
 You can run it using ```go run examples/example_1/main.go```
 
 ```go
@@ -29,11 +30,11 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/devlibx/gox-mysql/pkg"
+	"github.com/devlibx/gox-mysql/database"
 	"github.com/devlibx/gox-mysql/tests/e2etest/sql/users"
 )
 
-var testMySQLConfig = &pkg.MySQLConfig{
+var testMySQLConfig = &database.MySQLConfig{
 	ServerName:                  "test_server",
 	Host:                        "localhost",
 	Port:                        3306,
@@ -46,7 +47,7 @@ var testMySQLConfig = &pkg.MySQLConfig{
 
 func main() {
 	// Setup DB
-	sqlDb, err := pkg.NewMySQLDbWithoutLogging(testMySQLConfig)
+	sqlDb, err := database.NewMySQLDbWithoutLogging(testMySQLConfig)
 	if err != nil {
 		panic(err)
 	}
