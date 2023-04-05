@@ -6,11 +6,15 @@ import (
 	"fmt"
 	"github.com/devlibx/gox-base"
 	"github.com/devlibx/gox-base/errors"
+	"github.com/devlibx/gox-base/util"
+	"github.com/opentracing/opentracing-go"
 	_ "github.com/rcrowley/go-metrics"
 	"go.uber.org/zap"
 	"sync"
 	"time"
 )
+
+const methodDepthToGetFunctionName = 3
 
 type DB struct {
 	db     *sql.DB
@@ -69,26 +73,57 @@ func (d *DB) Close() {
 }
 
 func (d *DB) Exec(query string, args ...interface{}) (sql.Result, error) {
-	defer newLogInf("Exec", query, d.logger, d.config.EnableSqlQueryLogging, d.config.EnableSqlQueryMetricLogging).done(args...)
+
+	// Log query details and metrics
+	defer newLogInf(query, d.logger, d.config.EnableSqlQueryLogging, d.config.EnableSqlQueryMetricLogging).done(args...)
+
 	return d.db.Exec(query, args...)
 }
 
 func (d *DB) ExecContext(ctx context.Context, query string, args ...interface{}) (sql.Result, error) {
-	defer newLogInf("ExecContext", query, d.logger, d.config.EnableSqlQueryLogging, d.config.EnableSqlQueryMetricLogging).done(args...)
+
+	// Log span and trace
+	span, ctx := opentracing.StartSpanFromContext(ctx, util.GetMethodName(methodDepthToGetFunctionName))
+	defer span.Finish()
+
+	// Log query details and metrics
+	defer newLogInf(query, d.logger, d.config.EnableSqlQueryLogging, d.config.EnableSqlQueryMetricLogging).done(args...)
+
 	return d.db.ExecContext(ctx, query, args...)
 }
 
 func (d *DB) PrepareContext(ctx context.Context, query string) (*sql.Stmt, error) {
-	defer newLogInf("PrepareContext", query, d.logger, d.config.EnableSqlQueryLogging, d.config.EnableSqlQueryMetricLogging).done()
+
+	// Log span and trace
+	span, ctx := opentracing.StartSpanFromContext(ctx, util.GetMethodName(methodDepthToGetFunctionName))
+	defer span.Finish()
+
+	// Log query details and metrics
+	defer newLogInf(query, d.logger, d.config.EnableSqlQueryLogging, d.config.EnableSqlQueryMetricLogging).done()
+
 	return d.db.PrepareContext(ctx, query)
 }
 
 func (d *DB) QueryContext(ctx context.Context, query string, args ...interface{}) (*sql.Rows, error) {
-	defer newLogInf("QueryContext", query, d.logger, d.config.EnableSqlQueryLogging, d.config.EnableSqlQueryMetricLogging).done(args...)
+
+	// Log span and trace
+	span, ctx := opentracing.StartSpanFromContext(ctx, util.GetMethodName(methodDepthToGetFunctionName))
+	defer span.Finish()
+
+	// Log query details and metrics
+	defer newLogInf(query, d.logger, d.config.EnableSqlQueryLogging, d.config.EnableSqlQueryMetricLogging).done(args...)
+
 	return d.db.QueryContext(ctx, query, args...)
 }
 
 func (d *DB) QueryRowContext(ctx context.Context, query string, args ...interface{}) *sql.Row {
-	defer newLogInf("QueryRowContext", query, d.logger, d.config.EnableSqlQueryLogging, d.config.EnableSqlQueryMetricLogging).done(args...)
+
+	// Log span and trace
+	span, ctx := opentracing.StartSpanFromContext(ctx, util.GetMethodName(methodDepthToGetFunctionName))
+	defer span.Finish()
+
+	// Log query details and metrics
+	defer newLogInf(query, d.logger, d.config.EnableSqlQueryLogging, d.config.EnableSqlQueryMetricLogging).done(args...)
+
 	return d.db.QueryRowContext(ctx, query, args...)
 }

@@ -47,7 +47,7 @@ func cleanQuery(query string) string {
 	return strings.TrimSpace(result)
 }
 
-func newLogInf(name string, query string, logger *zap.Logger, enableSqlQueryLogging bool, enableSqlQueryMetricLogging bool) logInfo {
+func newLogInf(query string, logger *zap.Logger, enableSqlQueryLogging bool, enableSqlQueryMetricLogging bool) logInfo {
 
 	//  re := regexp.MustCompile(`^--\s*name:\s*(\S+)\s*:.*\n`)
 	//    match := re.FindStringSubmatch(input)
