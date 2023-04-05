@@ -21,6 +21,7 @@ Run ```example_main.go```. Update the user/password in the file if needed.
 ---
 
 ### Example code
+You can run it using ```go run examples/example_1/main.go```
 
 ```go
 package main
