@@ -18,6 +18,7 @@ var regexFileQueryName = regexp.MustCompile(`^--\s*name:\s*(\S+)\s*:.*\n`)
 var startMetricDumpSyncOnce = sync.Once{}
 
 type logInfo struct {
+	ctx                         context.Context
 	name                        string
 	startTime                   int64
 	timeTaken                   int64
@@ -46,6 +47,7 @@ func (l logInfo) done(args ...interface{}) {
 
 	// Call the callback hook function
 	l.callbacks.PostCallbackFunc(PostCallbackData{
+		Ctx:       l.ctx,
 		Name:      l.name,
 		StartTime: l.startTime,
 		EndTime:   endTime,
@@ -59,7 +61,7 @@ func cleanQuery(query string) string {
 	return strings.TrimSpace(result)
 }
 
-func newLogInf(query string, logger *zap.Logger, enableSqlQueryLogging bool, enableSqlQueryMetricLogging bool, callbacks *Callbacks) logInfo {
+func newLogInf(ctx context.Context, query string, logger *zap.Logger, enableSqlQueryLogging bool, enableSqlQueryMetricLogging bool, callbacks *Callbacks) logInfo {
 
 	//  re := regexp.MustCompile(`^--\s*name:\s*(\S+)\s*:.*\n`)
 	//    match := re.FindStringSubmatch(input)
@@ -69,6 +71,7 @@ func newLogInf(query string, logger *zap.Logger, enableSqlQueryLogging bool, ena
 	//        fmt.Println(name)
 
 	return logInfo{
+		ctx:                         ctx,
 		startTime:                   time.Now().UnixMilli(),
 		name:                        util.GetMethodNameName(5),
 		query:                       query,

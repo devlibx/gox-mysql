@@ -33,6 +33,7 @@ import (
 	"github.com/devlibx/gox-base/serialization"
 	"github.com/devlibx/gox-mysql/database"
 	"github.com/devlibx/gox-mysql/tests/e2etest/sql/users"
+	"github.com/opentracing/opentracing-go"
 )
 
 var testMySQLConfig = &database.MySQLConfig{
@@ -42,7 +43,7 @@ var testMySQLConfig = &database.MySQLConfig{
 	User:                        "test",
 	Password:                    "test",
 	Db:                          "users",
-	EnableSqlQueryLogging:       true,
+	EnableSqlQueryLogging:       false,
 	EnableSqlQueryMetricLogging: true,
 }
 
@@ -52,12 +53,20 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	
+
 	// This is a callback (Optional)
-	// It tell you time takne, when this DB call started, ended etc
+	// It tell you time taken, when this DB call started, ended etc.
 	// You can use it to alert if some specific query take some time (you get the name of the query in the payload)
 	sqlDb.RegisterPostCallbackFunc(func(data database.PostCallbackData) {
 		fmt.Println("PostCallbackData=", serialization.StringifySuppressError(data, "na"))
+
+		// If the DB call take
+		if data.TimeTaken > 1 {
+			span, _ := opentracing.StartSpanFromContext(data.Ctx, data.Name+"-LongRunningDbCall")
+			span.SetTag("error", "Time taken > 1ms")
+			defer span.Finish()
+			fmt.Printf("Something is wrong it took very long: data=%s \n", serialization.StringifySuppressError(data, "na"))
+		}
 
 		// We will get the callback which contains total time taken for debuting
 		// Note you can add your own alerts e.g. If this is "PersistUser" and take more than 20 ms

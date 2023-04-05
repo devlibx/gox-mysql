@@ -91,7 +91,7 @@ func (d *DB) Close() {
 func (d *DB) Exec(query string, args ...interface{}) (sql.Result, error) {
 
 	// Log query details and metrics
-	defer d.buildNewLogInf(query).done(args...)
+	defer d.buildNewLogInf(context.Background(), query).done(args...)
 
 	return d.db.Exec(query, args...)
 }
@@ -103,7 +103,7 @@ func (d *DB) ExecContext(ctx context.Context, query string, args ...interface{})
 	defer span.Finish()
 
 	// Log query details and metrics
-	defer d.buildNewLogInf(query).done(args...)
+	defer d.buildNewLogInf(ctx, query).done(args...)
 
 	return d.db.ExecContext(ctx, query, args...)
 }
@@ -115,7 +115,7 @@ func (d *DB) PrepareContext(ctx context.Context, query string) (*sql.Stmt, error
 	defer span.Finish()
 
 	// Log query details and metrics
-	defer d.buildNewLogInf(query).done()
+	defer d.buildNewLogInf(ctx, query).done()
 
 	return d.db.PrepareContext(ctx, query)
 }
@@ -127,7 +127,7 @@ func (d *DB) QueryContext(ctx context.Context, query string, args ...interface{}
 	defer span.Finish()
 
 	// Log query details and metrics
-	defer d.buildNewLogInf(query).done(args...)
+	defer d.buildNewLogInf(ctx, query).done(args...)
 
 	return d.db.QueryContext(ctx, query, args...)
 }
@@ -139,11 +139,11 @@ func (d *DB) QueryRowContext(ctx context.Context, query string, args ...interfac
 	defer span.Finish()
 
 	// Log query details and metrics
-	defer d.buildNewLogInf(query).done(args...)
+	defer d.buildNewLogInf(ctx, query).done(args...)
 
 	return d.db.QueryRowContext(ctx, query, args...)
 }
 
-func (d *DB) buildNewLogInf(query string) logInfo {
-	return newLogInf(query, d.logger, d.config.EnableSqlQueryLogging, d.config.EnableSqlQueryMetricLogging, d.callbacks)
+func (d *DB) buildNewLogInf(ctx context.Context, query string) logInfo {
+	return newLogInf(ctx, query, d.logger, d.config.EnableSqlQueryLogging, d.config.EnableSqlQueryMetricLogging, d.callbacks)
 }
