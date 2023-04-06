@@ -103,6 +103,13 @@ func main() {
 ```
 
 ## Observability
+All the following are part of the lib, you need to switch on/off as you need
+
+```shell
+ EnableSqlQueryLogging         => To print "Query, Time Taken, Params"
+ EnableSqlQueryMetricLogging   => To print "Histogram"
+ OpenTracking is automitaclly enabled, and it sends traces to whatever OpenTracing framework you have configured
+```
 #### Query, Time Taken, Params
 This lib outputs logs which shows how much a query took, with SQL and the parameter used. It also provides a hook,
 which is called at the end of each DB call which also exposes all this info. 
