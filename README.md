@@ -35,60 +35,69 @@ You can run it using ```go run examples/example_1/main.go```
 package main
 
 import (
-	"context"
-	"fmt"
-	"github.com/devlibx/gox-base/serialization"
-	"github.com/devlibx/gox-mysql/database"
-	"github.com/devlibx/gox-mysql/tests/e2etest/sql/users"
-	"github.com/opentracing/opentracing-go"
+   "context"
+   "fmt"
+   "github.com/devlibx/gox-base/serialization"
+   "github.com/devlibx/gox-mysql/database"
+   "github.com/devlibx/gox-mysql/tests/e2etest/sql/users"
+   "github.com/opentracing/opentracing-go"
 )
 
 var testMySQLConfig = &database.MySQLConfig{
-	ServerName:                  "test_server",
-	Host:                        "localhost",
-	Port:                        3306,
-	User:                        "test",
-	Password:                    "test",
-	Db:                          "users",
-	EnableSqlQueryLogging:       false,
-	EnableSqlQueryMetricLogging: true,
+   ServerName:                  "test_server",
+   Host:                        "localhost",
+   Port:                        3306,
+   User:                        "test",
+   Password:                    "test",
+   Db:                          "users",
+   EnableSqlQueryLogging:       false,
+   EnableSqlQueryMetricLogging: true,
 }
 
 func main() {
-	// Setup DB
-	sqlDb, err := database.NewMySQLDbWithoutLogging(testMySQLConfig)
-	if err != nil {
-		panic(err)
-	}
+   // Setup DB
+   sqlDb, err := database.NewMySQLDbWithoutLogging(testMySQLConfig)
+   if err != nil {
+      panic(err)
+   }
 
-	// This is a callback (Optional)
-	// It tell you time taken, when this DB call started, ended etc.
-	// You can use it to alert if some specific query take some time (you get the name of the query in the payload)
-	sqlDb.RegisterPostCallbackFunc(func(data database.PostCallbackData) {
-		fmt.Println("PostCallbackData=", serialization.StringifySuppressError(data, "na"))
+   // This is a callback (Optional)
+   // It tell you time taken, when this DB call started, ended etc.
+   // You can use it to alert if some specific query take some time (you get the name of the query in the payload)
+   sqlDb.RegisterPostCallbackFunc(func(data database.PostCallbackData) {
+      fmt.Println("PostCallbackData=", serialization.StringifySuppressError(data, "na"))
 
-		// If the DB call take
-		if data.TimeTaken > 1 {
-			span, _ := opentracing.StartSpanFromContext(data.Ctx, data.Name+"-LongRunningDbCall")
-			span.SetTag("error", "Time taken > 1ms")
-			defer span.Finish()
-			fmt.Printf("Something is wrong it took very long: data=%s \n", serialization.StringifySuppressError(data, "na"))
-		}
+      // We will get the callback which contains total time taken for debugging
+      if data.TimeTaken > 1 {
+         span, _ := opentracing.StartSpanFromContext(data.Ctx, data.GetDbCallNameForTracing())
+         defer span.Finish()
+         span.SetTag("error", true)
+         span.SetTag("time_taken", data.TimeTaken)
+         fmt.Printf("Something is wrong it took very long: data=%s \n", serialization.StringifySuppressError(data, "na"))
 
-		// We will get the callback which contains total time taken for debuging (also the Query name which you defined
-		// in your SQL file)
-		// Note you can add your own alerts e.g. If this is "PersistUser" and take more than 20 ms
-		// then do something
-		// >> PostCallbackData= {"name":"users.(*Queries).PersistUser","start_time":1680709127885,"end_time":1680709127898,"time_taken":13}
-	})
+         // >> You will see following if time > 1ms
+         // Something is wrong it took very long: data={"name":"users.(*Queries).PersistUser","start_time":1680761853659,"end_time":1680761853672,"time_taken":13,"error":null}
+      }
+   })
 
-	queryInterface := users.New(sqlDb)
+   queryInterface := users.New(sqlDb)
 
-	// Persist user
-	if result, err := queryInterface.PersistUser(context.Background(), "Harish"); err == nil {
-		fmt.Println("User saved", result)
-	} else {
-		fmt.Println("Something is wrong", err)
-	}
+   // Persist user
+   if result, err := queryInterface.PersistUser(context.Background(), users.PersistUserParams{Name: "Harish", Department: "tech"}); err == nil {
+      fmt.Println("User saved", result)
+   } else {
+      fmt.Println("Something is wrong", err)
+   }
+
+   if users, err := queryInterface.GetUserByNameAndDepartment(
+      context.Background(),
+      users.GetUserByNameAndDepartmentParams{Name: "Harish", Department: "tech"},
+   ); err == nil {
+      for _, u := range users {
+         fmt.Println("Users: ID=", u.ID, "Name=", u.Name, "Department=", u.Department)
+      }
+   } else {
+      fmt.Println("Something is wrong", err)
+   }
 }
 ```

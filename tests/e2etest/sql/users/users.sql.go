@@ -7,12 +7,13 @@ package users
 
 import (
 	"github.com/opentracing/opentracing-go"
+
 	"context"
 	"database/sql"
 )
 
 const GetUser = `-- name: GetUser :one
-SELECT id, name, deleted
+SELECT id, name, department, deleted
 from integrating_tests_users
 WHERE name = ?
   and deleted = 0
@@ -25,12 +26,61 @@ func (q *Queries) GetUser(ctx context.Context, name string) (IntegratingTestsUse
 	defer span.Finish()
 	row := q.queryRow(ctx, q.getUserStmt, GetUser, name)
 	var i IntegratingTestsUser
-	err := row.Scan(&i.ID, &i.Name, &i.Deleted)
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Department,
+		&i.Deleted,
+	)
 	return i, err
 }
 
+const GetUserByNameAndDepartment = `-- name: GetUserByNameAndDepartment :many
+SELECT id, name, department, deleted
+from integrating_tests_users
+WHERE name = ?
+  and deleted = 0
+  and department = ?
+`
+
+type GetUserByNameAndDepartmentParams struct {
+	Name       string `json:"name"`
+	Department string `json:"department"`
+}
+
+func (q *Queries) GetUserByNameAndDepartment(ctx context.Context, arg GetUserByNameAndDepartmentParams) ([]IntegratingTestsUser, error) {
+	ctx = context.WithValue(ctx, "__SQLCX_DB_CALL_NAME__", "GetUserByNameAndDepartment")
+	span, ctx := opentracing.StartSpanFromContext(ctx, "DB_Call_GetUserByNameAndDepartment")
+	defer span.Finish()
+	rows, err := q.query(ctx, q.getUserByNameAndDepartmentStmt, GetUserByNameAndDepartment, arg.Name, arg.Department)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []IntegratingTestsUser
+	for rows.Next() {
+		var i IntegratingTestsUser
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Department,
+			&i.Deleted,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const GetUsers = `-- name: GetUsers :many
-SELECT id, name, deleted
+SELECT id, name, department, deleted
 from integrating_tests_users
 WHERE deleted = 0
 `
@@ -47,7 +97,12 @@ func (q *Queries) GetUsers(ctx context.Context) ([]IntegratingTestsUser, error) 
 	var items []IntegratingTestsUser
 	for rows.Next() {
 		var i IntegratingTestsUser
-		if err := rows.Scan(&i.ID, &i.Name, &i.Deleted); err != nil {
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Department,
+			&i.Deleted,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -62,15 +117,20 @@ func (q *Queries) GetUsers(ctx context.Context) ([]IntegratingTestsUser, error) 
 }
 
 const PersistUser = `-- name: PersistUser :execresult
-INSERT INTO integrating_tests_users (name)
-VALUES (?)
+INSERT INTO integrating_tests_users (name, department)
+VALUES (?, ?)
 `
 
-func (q *Queries) PersistUser(ctx context.Context, name string) (sql.Result, error) {
+type PersistUserParams struct {
+	Name       string `json:"name"`
+	Department string `json:"department"`
+}
+
+func (q *Queries) PersistUser(ctx context.Context, arg PersistUserParams) (sql.Result, error) {
 	ctx = context.WithValue(ctx, "__SQLCX_DB_CALL_NAME__", "PersistUser")
 	span, ctx := opentracing.StartSpanFromContext(ctx, "DB_Call_PersistUser")
 	defer span.Finish()
-	return q.exec(ctx, q.persistUserStmt, PersistUser, name)
+	return q.exec(ctx, q.persistUserStmt, PersistUser, arg.Name, arg.Department)
 }
 
 const UpdateUserName = `-- name: UpdateUserName :execresult

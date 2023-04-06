@@ -9,7 +9,8 @@ import (
 )
 
 type IntegratingTestsUser struct {
-	ID      int32         `json:"id"`
-	Name    string        `json:"name"`
-	Deleted sql.NullInt32 `json:"deleted"`
+	ID         int32         `json:"id"`
+	Name       string        `json:"name"`
+	Department string        `json:"department"`
+	Deleted    sql.NullInt32 `json:"deleted"`
 }

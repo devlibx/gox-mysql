@@ -93,7 +93,7 @@ func persist(ctx context.Context, q *users.Queries, name string) {
 	span, ctx := opentracing.StartSpanFromContext(ctx, "Api_call_To_Persist")
 	defer span.Finish()
 
-	result, err := q.PersistUser(ctx, name)
+	result, err := q.PersistUser(ctx, users.PersistUserParams{Name: "Harish", Department: "tech"})
 	var id, rows int64
 	if err == nil {
 		id, _ = result.LastInsertId()

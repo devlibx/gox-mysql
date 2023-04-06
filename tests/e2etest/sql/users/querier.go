@@ -11,8 +11,9 @@ import (
 
 type Querier interface {
 	GetUser(ctx context.Context, name string) (IntegratingTestsUser, error)
+	GetUserByNameAndDepartment(ctx context.Context, arg GetUserByNameAndDepartmentParams) ([]IntegratingTestsUser, error)
 	GetUsers(ctx context.Context) ([]IntegratingTestsUser, error)
-	PersistUser(ctx context.Context, name string) (sql.Result, error)
+	PersistUser(ctx context.Context, arg PersistUserParams) (sql.Result, error)
 	UpdateUserName(ctx context.Context, arg UpdateUserNameParams) (sql.Result, error)
 }
 

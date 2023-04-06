@@ -27,6 +27,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.getUserStmt, err = db.PrepareContext(ctx, GetUser); err != nil {
 		return nil, fmt.Errorf("error preparing query GetUser: %w", err)
 	}
+	if q.getUserByNameAndDepartmentStmt, err = db.PrepareContext(ctx, GetUserByNameAndDepartment); err != nil {
+		return nil, fmt.Errorf("error preparing query GetUserByNameAndDepartment: %w", err)
+	}
 	if q.getUsersStmt, err = db.PrepareContext(ctx, GetUsers); err != nil {
 		return nil, fmt.Errorf("error preparing query GetUsers: %w", err)
 	}
@@ -44,6 +47,11 @@ func (q *Queries) Close() error {
 	if q.getUserStmt != nil {
 		if cerr := q.getUserStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getUserStmt: %w", cerr)
+		}
+	}
+	if q.getUserByNameAndDepartmentStmt != nil {
+		if cerr := q.getUserByNameAndDepartmentStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getUserByNameAndDepartmentStmt: %w", cerr)
 		}
 	}
 	if q.getUsersStmt != nil {
@@ -98,21 +106,23 @@ func (q *Queries) queryRow(ctx context.Context, stmt *sql.Stmt, query string, ar
 }
 
 type Queries struct {
-	db                 DBTX
-	tx                 *sql.Tx
-	getUserStmt        *sql.Stmt
-	getUsersStmt       *sql.Stmt
-	persistUserStmt    *sql.Stmt
-	updateUserNameStmt *sql.Stmt
+	db                             DBTX
+	tx                             *sql.Tx
+	getUserStmt                    *sql.Stmt
+	getUserByNameAndDepartmentStmt *sql.Stmt
+	getUsersStmt                   *sql.Stmt
+	persistUserStmt                *sql.Stmt
+	updateUserNameStmt             *sql.Stmt
 }
 
 func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 	return &Queries{
-		db:                 tx,
-		tx:                 tx,
-		getUserStmt:        q.getUserStmt,
-		getUsersStmt:       q.getUsersStmt,
-		persistUserStmt:    q.persistUserStmt,
-		updateUserNameStmt: q.updateUserNameStmt,
+		db:                             tx,
+		tx:                             tx,
+		getUserStmt:                    q.getUserStmt,
+		getUserByNameAndDepartmentStmt: q.getUserByNameAndDepartmentStmt,
+		getUsersStmt:                   q.getUsersStmt,
+		persistUserStmt:                q.persistUserStmt,
+		updateUserNameStmt:             q.updateUserNameStmt,
 	}
 }

@@ -50,7 +50,7 @@ func TestSimpleTestCase(t *testing.T) {
 
 	t.Run("Insert a new user", func(t *testing.T) {
 		q := users.New(sqlDb)
-		result, err := q.PersistUser(context.Background(), "Harish")
+		result, err := q.PersistUser(context.Background(), users.PersistUserParams{Name: "Harish", Department: "tech"})
 		assert.NoError(t, err)
 		id, _ := result.LastInsertId()
 		rows, _ := result.RowsAffected()

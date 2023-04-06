@@ -1,6 +1,6 @@
 -- name: PersistUser :execresult
-INSERT INTO integrating_tests_users (name)
-VALUES (?);
+INSERT INTO integrating_tests_users (name, department)
+VALUES (?, ?);
 
 -- name: UpdateUserName :execresult
 UPDATE integrating_tests_users
@@ -18,3 +18,10 @@ from integrating_tests_users
 WHERE name = ?
   and deleted = 0
 order by id desc;
+
+-- name: GetUserByNameAndDepartment :many
+SELECT *
+from integrating_tests_users
+WHERE name = ?
+  and deleted = 0
+  and department = ?
