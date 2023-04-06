@@ -101,3 +101,36 @@ func main() {
    }
 }
 ```
+
+## Observability
+#### Query, Time Taken, Params
+This lib outputs logs which shows how much a query took, with SQL and the parameter used. It also provides a hook,
+which is called at the end of each DB call which also exposes all this info. 
+You can use it to log slow queries and generate alerts
+
+#### Histogram
+This lib has inbuilt support to dump histogram of each query (If enabled). This histogram is printed for each query
+and gives details.
+```shell
+metrics: 11:55:47.745129 histogram INSERT INTO integrating_tests_users (name, department) VALUES (?, ?)
+metrics: 11:55:47.745141   count:              32
+metrics: 11:55:47.745145   min:                 1
+metrics: 11:55:47.745149   max:               163
+metrics: 11:55:47.745153   mean:               25.50
+metrics: 11:55:47.745157   stddev:             34.65
+metrics: 11:55:47.745160   median:             15.00
+metrics: 11:55:47.745164   75%:                29.75
+metrics: 11:55:47.745171   95%:               131.80
+metrics: 11:55:47.745175   99%:               163.00
+metrics: 11:55:47.745181   99.9%:             163.00
+```
+
+#### OpenTracing integration
+Sample trace to show an API call and the automatically added ```DB_Call_GetUser``` by the lib 
+![alt text](https://github.com/devlibx/images/blob/master/Full_API_Call_with_Db_Traces.png?raw=true)
+
+Sample trace to show an API call and  to mark your custom trace ```Slow_Query_Trace__PersistUser``` when timeTake > Nms
+![alt text](https://github.com/devlibx/images/blob/master/DB_Traces_with_Error.png)
+
+
+
