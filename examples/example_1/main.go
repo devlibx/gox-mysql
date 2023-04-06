@@ -51,7 +51,9 @@ func main() {
 	queryInterface := users.New(sqlDb)
 
 	// Persist user
-	if result, err := queryInterface.PersistUser(context.Background(), users.PersistUserParams{Name: "Harish", Department: "tech"}); err == nil {
+	if result, err := queryInterface.PersistUser(
+		context.Background(), users.PersistUserParams{Name: "Harish", Department: "tech"},
+	); err == nil {
 		fmt.Println("User saved", result)
 	} else {
 		fmt.Println("Something is wrong", err)
