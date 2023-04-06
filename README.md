@@ -14,7 +14,13 @@ This library gives convenient access to MySQL. It comes with few defaults:
 import "github.com/devlibx/gox-mysql/database"
 ```
 
-##### Try out sample application
+### How to start
+1. Install tolling using ```go install github.com/devlibx/sqlc/cmd/sqlcx@v1.0.6```
+2. Create your schema files (take samples from ```tests/e2etest/schema``` and generate using ```sqlcx generate```)
+3. You can see how to use this lib from following smaples
+---
+
+### Try out sample application
 
 ```
 # DB name is users for this setup
@@ -27,6 +33,8 @@ CREATE TABLE IF NOT EXISTS `integrating_tests_users`
     PRIMARY KEY (`id`)
 );
 ```
+
+(Optional) Go to ```tests/e2etest/schema``` and run ```sqlcx generate```
 
 Run ```example_main.go```. Update the user/password in the file if needed.
 
