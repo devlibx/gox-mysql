@@ -62,6 +62,7 @@ func main() {
 		panic(err)
 	}
 
+   // Start: ====================== This is Optional and added to show how can you add trace to slow query ============
 	// This is a callback (Optional)
 	// It tell you time taken, when this DB call started, ended etc.
 	// You can use it to alert if some specific query take some time (you get the name of the query in the payload)
@@ -80,8 +81,9 @@ func main() {
 			// Something is wrong it took very long: data={"name":"users.(*Queries).PersistUser","start_time":1680761853659,"end_time":1680761853672,"time_taken":13,"error":null}
 		}
 	})
-
-	queryInterface := users.New(sqlDb)
+   // End: ====================== This is Optional and added to show how can you add trace to slow query ============
+   
+   queryInterface := users.New(sqlDb)
 
 	// Persist user
 	if result, err := queryInterface.PersistUser(context.Background(), users.PersistUserParams{Name: "Harish", Department: "tech"}); err == nil {

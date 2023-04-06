@@ -109,7 +109,7 @@ func get(ctx context.Context, q *users.Queries, name string) {
 	span, ctx := opentracing.StartSpanFromContext(ctx, "Api_call_To_Get_And_Verify")
 	defer span.Finish()
 
-	result, err := q.GetUser(ctx, name)
+	result, err := q.GetUserByNameAndDepartment(ctx, users.GetUserByNameAndDepartmentParams{Name: "Harish", Department: "tech"})
 	_, _ = result, err
 	time.Sleep(1000 * time.Millisecond)
 }
