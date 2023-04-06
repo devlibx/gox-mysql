@@ -10,6 +10,10 @@ This library gives convenient access to MySQL. It comes with few defaults:
 5. You can enable histogram during perf to how each query is doing. It is dumped to the console every N sec
    This will help in perf testing
 
+```go
+import "github.com/devlibx/gox-mysql/database"
+```
+
 ##### Try out sample application
 
 ```
