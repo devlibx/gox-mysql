@@ -108,6 +108,11 @@ This lib outputs logs which shows how much a query took, with SQL and the parame
 which is called at the end of each DB call which also exposes all this info. 
 You can use it to log slow queries and generate alerts
 
+```shell
+2023-04-06T12:00:38.232+0530    INFO    db      database/internal.go:45 users.(*Queries).PersistUser    
+{"time": 128, "query": "INSERT INTO integrating_tests_users (name, department) VALUES (?, ?)", "args": ["Harish","tech"]}
+```
+
 #### Histogram
 This lib has inbuilt support to dump histogram of each query (If enabled). This histogram is printed for each query
 and gives details.
